@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import axios from 'axios';
+import { API_BASE_URL } from '../config.js';
 
 function Profile() {
   const { user, setUser, token } = useAuth(); 
@@ -57,7 +58,7 @@ function Profile() {
       }
 
       const res = await axios.patch(
-        'http://localhost:5000/api/auth/update',
+        `${API_BASE_URL}/auth/update`,
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );

@@ -19,6 +19,7 @@ import { Search } from '@mui/icons-material';
 import axios from 'axios';
 import ProductCard from '../components/Product/ProductCard.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx'; 
+import { API_BASE_URL } from '../config.js';
 
 function Home() {
   const [products, setProducts] = useState([]);
@@ -41,7 +42,7 @@ function Home() {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/products');
+      const response = await axios.get(`${API_BASE_URL}/products`);
       setProducts(response.data);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -52,7 +53,7 @@ function Home() {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/products/categories/all');
+      const response = await axios.get(`${API_BASE_URL}/products/categories/all`);
       setCategories(response.data);
     } catch (error) {
       console.error('Error fetching categories:', error);

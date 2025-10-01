@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext.jsx';
+import { API_BASE_URL } from '../config.js';
 
 const WishlistContext = createContext({
   items: [],
@@ -28,7 +29,7 @@ export function WishlistProvider({ children }) {
         return;
       }
       try {
-        const res = await axios.get('http://localhost:5000/api/wishlist');
+        const res = await axios.get(`${API_BASE_URL}/wishlist`);
         setItems(res.data.items || []);
       } catch (_) {
         setItems([]);
@@ -44,14 +45,14 @@ export function WishlistProvider({ children }) {
   const add = async (product) => {
     setItems((prev) => (prev.some((p) => p.id === product.id) ? prev : [...prev, product]));
     try {
-      if (user) await axios.post(`http://localhost:5000/api/wishlist/${product.id}`, product);
+      if (user) await axios.post(`${API_BASE_URL}/wishlist/${product.id}`, product);
     } catch (_) {}
   };
 
   const remove = async (productId) => {
     setItems((prev) => prev.filter((p) => p.id !== productId));
     try {
-      if (user) await axios.delete(`http://localhost:5000/api/wishlist/${productId}`);
+      if (user) await axios.delete(`${API_BASE_URL}/wishlist/${productId}`);
     } catch (_) {}
   };
 
@@ -60,8 +61,8 @@ export function WishlistProvider({ children }) {
     setItems((prev) => (exists ? prev.filter((p) => p.id !== product.id) : [...prev, product]));
     try {
       if (!user) return;
-      if (exists) await axios.delete(`http://localhost:5000/api/wishlist/${product.id}`);
-      else await axios.post(`http://localhost:5000/api/wishlist/${product.id}`, product);
+      if (exists) await axios.delete(`${API_BASE_URL}/wishlist/${product.id}`);
+      else await axios.post(`${API_BASE_URL}/wishlist/${product.id}`, product);
     } catch (_) {}
   };
 
