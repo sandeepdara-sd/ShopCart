@@ -1,52 +1,30 @@
 import express from 'express';
-import axios from 'axios';
+import productsData from '../data/products.json' assert { type: 'json' }; // Node.js 18+ supports this
 
 const router = express.Router();
 
 // Get all products
-router.get('/', async (req, res) => {
-  try {
-    const response = await axios.get('https://fakestoreapi.com/products');
-    res.json(response.data);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching products', error: error.message });
-  }
+router.get('/', (req, res) => {
+  res.json(productsData);
 });
 
-// 🔹 Get all categories (specific route first)
-router.get('/categories/all', async (req, res) => {
-  try {
-    const response = await axios.get('https://fakestoreapi.com/products/categories', {
-      headers: { 'User-Agent': 'Mozilla/5.0' }
-    });
-    res.json(response.data);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching categories', error: error.message });
-  }
+// Get product by ID
+router.get('/:id', (req, res) => {
+  const product = productsData.find(p => p.id === parseInt(req.params.id));
+  if (product) res.json(product);
+  else res.status(404).json({ message: 'Product not found' });
 });
 
 // Get products by category
-router.get('/category/:category', async (req, res) => {
-  try {
-    const response = await axios.get(`https://fakestoreapi.com/products/category/${req.params.category}`, {
-      headers: { 'User-Agent': 'Mozilla/5.0' }
-    });
-    res.json(response.data);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching products by category', error: error.message });
-  }
+router.get('/category/:category', (req, res) => {
+  const filtered = productsData.filter(p => p.category === req.params.category);
+  res.json(filtered);
 });
 
-// Get product by ID (keep dynamic routes last)
-router.get('/:id', async (req, res) => {
-  try {
-    const response = await axios.get(`https://fakestoreapi.com/products/${req.params.id}`, {
-      headers: { 'User-Agent': 'Mozilla/5.0' }
-    });
-    res.json(response.data);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching product', error: error.message });
-  }
+// Get all categories
+router.get('/categories/all', (req, res) => {
+  const categories = [...new Set(productsData.map(p => p.category))];
+  res.json(categories);
 });
 
 export default router;
