@@ -14,11 +14,8 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors({
-  origin: ["http://localhost:5173", "https://sd-shopcart.vercel.app"],
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-  // credentials: true,
-}));
+app.use(cors({ origin: "*" }));
+
 
 app.use(express.json());
 
