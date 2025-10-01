@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global CSS animations and utilities (MUI-safe) */
+:root {
+  --elev-1: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --elev-2: 0 6px 18px rgba(0, 0, 0, 0.10);
+}
+
+@keyframes fade-in-up {
+  0% { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes float-y {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
+}
+
+.anim-fade-up { animation: fade-in-up .5s ease-out both; }
+.anim-fade { animation: fade-in .6s ease-out both; }
+.anim-float { animation: float-y 6s ease-in-out infinite; }
+
+.glass {
+  backdrop-filter: saturate(140%) blur(10px);
+  -webkit-backdrop-filter: saturate(140%) blur(10px);
+  background-color: rgba(255,255,255,0.6);
+}
+
+.glass-dark {
+  backdrop-filter: saturate(140%) blur(10px);
+  -webkit-backdrop-filter: saturate(140%) blur(10px);
+  background-color: rgba(15,21,35,0.5);
+}
+
+.hover-lift {
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.hover-lift:hover { transform: translateY(-4px); box-shadow: var(--elev-2); }
+
+/* Heavier UI accents */
+.gradient-text {
+  background: linear-gradient(90deg, #1976d2, #dc004e);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.shine {
+  position: relative;
+  overflow: hidden;
+}
+.shine::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -150%; height: 100%; width: 50%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,.25), transparent);
+  transform: skewX(-20deg);
+}
+.shine:hover::after {
+  left: 150%; transition: left .8s ease;
+}
+
+/* Animated gradient background */
+@keyframes gradient-move {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animated-gradient {
+  background: linear-gradient(120deg, #0b57d0, #ff4d6d, #5b8def, #ff8fa3);
+  background-size: 300% 300%;
+  animation: gradient-move 12s ease infinite;
+}
