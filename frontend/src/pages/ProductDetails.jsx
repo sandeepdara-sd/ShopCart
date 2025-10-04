@@ -26,6 +26,8 @@ import {
   Tooltip,
   Snackbar,
   Alert,
+  useTheme,
+  alpha,
 } from '@mui/material';
 import { 
   ShoppingCart, 
@@ -56,6 +58,7 @@ function ProductDetails() {
   const { id } = useParams();
   const { user } = useAuth();
   const { addToCart, isActionLoading } = useCart();
+  const theme = useTheme();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
@@ -280,7 +283,9 @@ function ProductDetails() {
 
   return (
     <Box sx={{ 
-      background: 'linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%)',
+      background: theme.palette.mode === 'light'
+        ? 'linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%)'
+        : 'linear-gradient(180deg, #0a0e1a 0%, #1a1f2e 100%)',
       minHeight: '100vh',
       py: 4,
     }}>
@@ -339,8 +344,12 @@ function ProductDetails() {
                           onClick={handleWishlistToggle}
                           disabled={wishlistLoading}
                           sx={{ 
-                            backgroundColor: 'white',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                            backgroundColor: theme.palette.mode === 'light' 
+                              ? 'white' 
+                              : alpha(theme.palette.background.paper, 0.8),
+                            boxShadow: theme.palette.mode === 'light'
+                              ? '0 2px 8px rgba(0,0,0,0.1)'
+                              : '0 2px 8px rgba(0,0,0,0.3)',
                             transition: 'all 0.3s',
                             ...(isInWishlist && {
                               backgroundColor: 'error.main',
@@ -372,8 +381,12 @@ function ProductDetails() {
                           size="small"
                           onClick={handleShare}
                           sx={{ 
-                            backgroundColor: 'white',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                            backgroundColor: theme.palette.mode === 'light' 
+                              ? 'white' 
+                              : alpha(theme.palette.background.paper, 0.8),
+                            boxShadow: theme.palette.mode === 'light'
+                              ? '0 2px 8px rgba(0,0,0,0.1)'
+                              : '0 2px 8px rgba(0,0,0,0.3)',
                             '&:hover': { 
                               backgroundColor: 'primary.main',
                               color: 'white',
@@ -394,10 +407,10 @@ function ProductDetails() {
                   elevation={0}
                   sx={{ 
                     p: 4, 
-                    backgroundColor: 'white',
+                    backgroundColor: theme.palette.background.paper,
                     borderRadius: 4,
                     border: '1px solid',
-                    borderColor: 'grey.200',
+                    borderColor: theme.palette.divider,
                     position: 'relative',
                     overflow: 'hidden',
                     '&::before': {
@@ -407,7 +420,9 @@ function ProductDetails() {
                       left: 0,
                       right: 0,
                       bottom: 0,
-                      background: 'linear-gradient(135deg, rgba(25,118,210,0.05) 0%, rgba(156,39,176,0.05) 100%)',
+                      background: theme.palette.mode === 'light'
+                        ? 'linear-gradient(135deg, rgba(25,118,210,0.05) 0%, rgba(156,39,176,0.05) 100%)'
+                        : 'linear-gradient(135deg, rgba(102,126,234,0.1) 0%, rgba(118,75,162,0.1) 100%)',
                       opacity: imageLoaded ? 1 : 0,
                       transition: 'opacity 0.5s',
                     }
@@ -458,12 +473,13 @@ function ProductDetails() {
                           p: 2.5, 
                           textAlign: 'center',
                           border: '1px solid',
-                          borderColor: 'grey.200',
+                          borderColor: theme.palette.divider,
                           borderRadius: 3,
+                          backgroundColor: theme.palette.background.paper,
                           transition: 'all 0.3s',
                           '&:hover': {
                             borderColor: 'primary.main',
-                            boxShadow: '0 4px 12px rgba(25,118,210,0.15)',
+                            boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.15)}`,
                             transform: 'translateY(-4px)',
                           }
                         }}
@@ -485,12 +501,13 @@ function ProductDetails() {
                           p: 2.5, 
                           textAlign: 'center',
                           border: '1px solid',
-                          borderColor: 'grey.200',
+                          borderColor: theme.palette.divider,
                           borderRadius: 3,
+                          backgroundColor: theme.palette.background.paper,
                           transition: 'all 0.3s',
                           '&:hover': {
                             borderColor: 'primary.main',
-                            boxShadow: '0 4px 12px rgba(25,118,210,0.15)',
+                            boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.15)}`,
                             transform: 'translateY(-4px)',
                           }
                         }}
@@ -545,7 +562,9 @@ function ProductDetails() {
                     fontWeight: 800,
                     lineHeight: 1.2,
                     mb: 2,
-                    background: 'linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%)',
+                    background: theme.palette.mode === 'light'
+                      ? 'linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%)'
+                      : 'linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
                   }}
@@ -559,10 +578,12 @@ function ProductDetails() {
                   sx={{ 
                     p: 2.5, 
                     mb: 3,
-                    backgroundColor: 'grey.50',
+                    backgroundColor: theme.palette.mode === 'light' 
+                      ? alpha(theme.palette.grey[100], 0.5)
+                      : alpha(theme.palette.background.paper, 0.6),
                     borderRadius: 3,
                     border: '1px solid',
-                    borderColor: 'grey.200',
+                    borderColor: theme.palette.divider,
                   }}
                 >
                   <Stack direction="row" spacing={3} alignItems="center" flexWrap="wrap">
@@ -590,7 +611,7 @@ function ProductDetails() {
                             width: 100, 
                             height: 6, 
                             borderRadius: 3,
-                            backgroundColor: 'grey.300',
+                            backgroundColor: alpha(theme.palette.grey[500], 0.2),
                             '& .MuiLinearProgress-bar': {
                               background: 'linear-gradient(90deg, #f59e0b 0%, #eab308 100%)',
                             }
@@ -640,7 +661,8 @@ function ProductDetails() {
                     mb: 3,
                     borderRadius: 3,
                     border: '1px solid',
-                    borderColor: 'grey.200',
+                    borderColor: theme.palette.divider,
+                    backgroundColor: theme.palette.background.paper,
                     overflow: 'hidden',
                   }}
                 >
@@ -649,7 +671,7 @@ function ProductDetails() {
                     onChange={(e, v) => setSelectedTab(v)}
                     sx={{
                       borderBottom: '1px solid',
-                      borderColor: 'grey.200',
+                      borderColor: theme.palette.divider,
                       '& .MuiTab-root': { fontWeight: 600 },
                     }}
                   >
@@ -728,6 +750,7 @@ function ProductDetails() {
                           borderColor: 'primary.main',
                           borderRadius: 2,
                           overflow: 'hidden',
+                          backgroundColor: theme.palette.background.paper,
                         }}
                       >
                         <IconButton 
@@ -781,10 +804,12 @@ function ProductDetails() {
                         sx={{ 
                           p: 2, 
                           flex: 1,
-                          background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+                          background: theme.palette.mode === 'light'
+                            ? 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)'
+                            : `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.15)} 0%, ${alpha(theme.palette.primary.main, 0.25)} 100%)`,
                           borderRadius: 2,
                           border: '1px solid',
-                          borderColor: 'primary.light',
+                          borderColor: alpha(theme.palette.primary.main, 0.3),
                         }}
                       >
                         <Typography variant="caption" color="text.secondary" display="block">
@@ -847,9 +872,12 @@ function ProductDetails() {
                     elevation={0}
                     sx={{ 
                       p: 4, 
-                      background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+                      background: theme.palette.mode === 'light'
+                        ? 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)'
+                        : `linear-gradient(135deg, ${alpha(theme.palette.warning.main, 0.2)} 0%, ${alpha(theme.palette.warning.main, 0.3)} 100%)`,
                       borderRadius: 3,
-                      border: '2px solid #fbbf24',
+                      border: '2px solid',
+                      borderColor: theme.palette.warning.main,
                       textAlign: 'center',
                     }}
                   >
@@ -901,4 +929,3 @@ function ProductDetails() {
 }
 
 export default ProductDetails;
-                         

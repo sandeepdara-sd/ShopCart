@@ -301,7 +301,7 @@ function ProductCard({ product, isInWishlist: initialIsInWishlist, onWishlistCha
         </Box>
 
         {/* Favorite Button */}
-        <Tooltip title={isFavorite ? "Remove from wishlist" : "Add to wishlist"} arrow>
+       <Tooltip title={isFavorite ? "Remove from wishlist" : "Add to wishlist"} arrow>
           <IconButton
             onClick={handleFavoriteToggle}
             disabled={wishlistLoading}
@@ -322,7 +322,7 @@ function ProductCard({ product, isInWishlist: initialIsInWishlist, onWishlistCha
             ) : isFavorite ? (
               <Favorite sx={{ fontSize: 20, color: '#fa709a' }} />
             ) : (
-              <FavoriteBorder sx={{ fontSize: 20, color: theme.palette.text.secondary }} />
+              <FavoriteBorder sx={{ fontSize: 20, color: '#666' }} />
             )}
           </IconButton>
         </Tooltip>

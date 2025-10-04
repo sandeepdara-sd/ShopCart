@@ -286,6 +286,7 @@ function Wishlist() {
                       }}
                     >
                       {/* Remove Button */}
+                     {/* Remove Button */}
                       <Tooltip title="Remove from Wishlist">
                         <IconButton
                           size="small"
@@ -296,7 +297,8 @@ function Wishlist() {
                             top: 8,
                             right: 8,
                             zIndex: 2,
-                            backgroundColor: 'white',
+                            backgroundColor: 'background.paper',
+                            color: 'text.primary',
                             boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                             '&:hover': {
                               backgroundColor: 'error.main',
