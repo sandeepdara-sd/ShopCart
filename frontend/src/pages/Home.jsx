@@ -21,6 +21,8 @@ import ProductCard from '../components/Product/ProductCard.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx'; 
 import { API_BASE_URL } from '../config.js';
 
+const WISHLIST_STORAGE_KEY = 'wishlist_items_v1';
+
 function Home() {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -28,17 +30,75 @@ function Home() {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  
-
+  const [wishlistItems, setWishlistItems] = useState([]);
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchProducts();
     fetchCategories();
+    fetchWishlist();
   }, []);
+
+  useEffect(() => {
+    fetchWishlist();
+  }, [user]);
 
   useEffect(() => {
     filterProducts();
   }, [products, selectedCategory, searchTerm]);
+
+  // Listen for wishlist changes from other components
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === WISHLIST_STORAGE_KEY) {
+        fetchWishlist();
+      }
+    };
+
+    const handleWishlistUpdate = () => {
+      fetchWishlist();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('wishlist-updated', handleWishlistUpdate);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('wishlist-updated', handleWishlistUpdate);
+    };
+  }, [user]);
+
+  const fetchWishlist = async () => {
+    try {
+      if (user) {
+        // Fetch from server
+        const response = await axios.get(`${API_BASE_URL}/wishlist`);
+        const items = response.data.items || [];
+        setWishlistItems(items.map(item => item.productId || item.id));
+      } else {
+        // Fetch from localStorage
+        const stored = localStorage.getItem(WISHLIST_STORAGE_KEY);
+        if (stored) {
+          const items = JSON.parse(stored);
+          setWishlistItems(items.map(item => String(item.id)));
+        } else {
+          setWishlistItems([]);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching wishlist:', error);
+      // Fallback to localStorage
+      try {
+        const stored = localStorage.getItem(WISHLIST_STORAGE_KEY);
+        if (stored) {
+          const items = JSON.parse(stored);
+          setWishlistItems(items.map(item => String(item.id)));
+        }
+      } catch (_) {
+        setWishlistItems([]);
+      }
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -75,6 +135,10 @@ function Home() {
     }
 
     setFilteredProducts(filtered);
+  };
+
+  const handleWishlistChange = () => {
+    fetchWishlist();
   };
 
   if (loading) {
@@ -150,7 +214,11 @@ function Home() {
       <Grid container spacing={3} className="anim-fade">
         {filteredProducts.map((product) => (
           <Grid item xs={12} sm={6} md={4} lg={3} key={product.id}>
-            <ProductCard product={product} />
+            <ProductCard 
+              product={product} 
+              isInWishlist={wishlistItems.includes(String(product.id))}
+              onWishlistChange={handleWishlistChange}
+            />
           </Grid>
         ))}
       </Grid>

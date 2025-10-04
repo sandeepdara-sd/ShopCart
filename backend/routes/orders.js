@@ -67,4 +67,34 @@ router.get('/:id', auth, async (req, res) => {
   }
 });
 
+// Delete/Cancel order
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    const order = await Order.findOne({ 
+      _id: req.params.id, 
+      userId: req.user._id 
+    });
+    
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+    
+    // Optional: Only allow cancellation of pending orders
+    if (order.status === 'delivered') {
+      return res.status(400).json({ 
+        message: 'Cannot cancel delivered orders' 
+      });
+    }
+    
+    await Order.findByIdAndDelete(req.params.id);
+    
+    res.json({ 
+      message: 'Order cancelled successfully',
+      orderId: req.params.id 
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error cancelling order', error: error.message });
+  }
+});
+
 export default router;

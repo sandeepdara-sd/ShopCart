@@ -87,50 +87,47 @@ export function CartProvider({ children }) {
     }
   }, [user]);
 
-  const addToCart = useCallback(async (product, quantity = 1) => {
+  // ✅ FIXED: Properly handles quantity
+  const addToCart = useCallback(async (product) => {
     if (!user) {
       setError('Please login to add items to cart');
       return { success: false, error: 'Not authenticated' };
     }
 
-    const actionId = `add-${product.id || product._id}`;
+    // Extract quantity and productId
+    const quantity = product.quantity || 1;
+    const productId = product.productId || product.id || product._id;
+    const actionId = `add-${productId}`;
+    
+    console.log('🛒 Adding to cart:', { 
+      productId, 
+      quantity, 
+      productData: product 
+    });
+    
     setActionLoading((prev) => ({ ...prev, [actionId]: true }));
     setError(null);
 
-    // Optimistic update
-    const optimisticCart = cart ? {
-      ...cart,
-      items: [
-        ...cart.items,
-        {
-          ...product,
-          quantity,
-          _id: product.id || product._id,
-        },
-      ],
-      totalItems: (cart.totalItems || 0) + quantity,
-      totalPrice: (cart.totalPrice || 0) + (product.price * quantity),
-    } : null;
-
-    setCart(optimisticCart);
-
     try {
+      // Make API call with quantity
       const data = await apiFetch('/cart/add', {
         method: 'POST',
-        body: JSON.stringify({ ...product, quantity }),
+        body: JSON.stringify({ 
+          productId,
+          title: product.title,
+          price: product.price,
+          image: product.image,
+          quantity  // ✅ This is the key - quantity is sent to backend
+        }),
       });
 
+      console.log('✅ Cart response:', data);
       setCart(data);
-      notify('Added to cart', { severity: 'success' });
       return { success: true, data };
     } catch (error) {
-      // Revert optimistic update on error
-      await fetchCart(false);
-      
       const errorMessage = error.message || 'Failed to add item to cart';
       setError(errorMessage);
-      console.error('Error adding to cart:', error);
-      notify(errorMessage, { severity: 'error' });
+      console.error('❌ Error adding to cart:', error);
       return { success: false, error: errorMessage };
     } finally {
       setActionLoading((prev) => {
@@ -139,7 +136,7 @@ export function CartProvider({ children }) {
         return newState;
       });
     }
-  }, [user, cart, fetchCart]);
+  }, [user, notify]);
 
   const updateQuantity = useCallback(async (productId, quantity) => {
     if (!user || quantity < 0) return { success: false };
@@ -148,10 +145,8 @@ export function CartProvider({ children }) {
     setActionLoading((prev) => ({ ...prev, [actionId]: true }));
     setError(null);
 
-    // Store previous state for rollback
     const previousCart = cart;
 
-    // Optimistic update
     if (cart && cart.items) {
       const updatedItems = cart.items.map((item) =>
         (item._id || item.id) === productId ? { ...item, quantity } : item
@@ -178,16 +173,13 @@ export function CartProvider({ children }) {
       });
 
       setCart(data);
-      notify('Cart updated', { severity: 'success' });
       return { success: true, data };
     } catch (error) {
-      // Rollback on error
       setCart(previousCart);
       
       const errorMessage = error.message || 'Failed to update quantity';
       setError(errorMessage);
       console.error('Error updating quantity:', error);
-      notify(errorMessage, { severity: 'error' });
       return { success: false, error: errorMessage };
     } finally {
       setActionLoading((prev) => {
@@ -205,10 +197,8 @@ export function CartProvider({ children }) {
     setActionLoading((prev) => ({ ...prev, [actionId]: true }));
     setError(null);
 
-    // Store previous state for rollback
     const previousCart = cart;
 
-    // Optimistic update
     if (cart && cart.items) {
       const removedItem = cart.items.find((item) => (item._id || item.id) === productId);
       const updatedItems = cart.items.filter((item) => (item._id || item.id) !== productId);
@@ -227,16 +217,13 @@ export function CartProvider({ children }) {
       });
 
       setCart(data);
-      notify('Item removed from cart', { severity: 'info' });
       return { success: true, data };
     } catch (error) {
-      // Rollback on error
       setCart(previousCart);
       
       const errorMessage = error.message || 'Failed to remove item';
       setError(errorMessage);
       console.error('Error removing from cart:', error);
-      notify(errorMessage, { severity: 'error' });
       return { success: false, error: errorMessage };
     } finally {
       setActionLoading((prev) => {
@@ -253,10 +240,7 @@ export function CartProvider({ children }) {
     setActionLoading((prev) => ({ ...prev, clear: true }));
     setError(null);
 
-    // Store previous state for rollback
     const previousCart = cart;
-
-    // Optimistic update
     setCart({ items: [], totalItems: 0, totalPrice: 0 });
 
     try {
@@ -265,16 +249,13 @@ export function CartProvider({ children }) {
       });
 
       setCart(data);
-      notify('Cart cleared', { severity: 'info' });
       return { success: true, data };
     } catch (error) {
-      // Rollback on error
       setCart(previousCart);
       
       const errorMessage = error.message || 'Failed to clear cart';
       setError(errorMessage);
       console.error('Error clearing cart:', error);
-      notify(errorMessage, { severity: 'error' });
       return { success: false, error: errorMessage };
     } finally {
       setActionLoading((prev) => {
@@ -285,12 +266,10 @@ export function CartProvider({ children }) {
     }
   }, [user, cart]);
 
-  // Helper to check if specific action is loading
   const isActionLoading = useCallback((actionId) => {
     return actionLoading[actionId] || false;
   }, [actionLoading]);
 
-  // Calculate cart summary
   const cartSummary = {
     itemCount: cart?.totalItems || 0,
     subtotal: cart?.totalPrice || 0,
@@ -319,6 +298,11 @@ export function CartProvider({ children }) {
   );
 }
 
-export function useCart() {
-  return useContext(CartContext);
-}
+// ✅ FIXED: Export hook separately to avoid Fast Refresh warning
+export const useCart = () => {
+  const context = useContext(CartContext);
+  if (!context) {
+    throw new Error('useCart must be used within CartProvider');
+  }
+  return context;
+};

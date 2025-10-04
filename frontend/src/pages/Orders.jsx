@@ -15,14 +15,25 @@ import {
   AccordionDetails,
   CircularProgress,
   Container,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Alert,
+  Snackbar,
 } from '@mui/material';
-import { ExpandMore, Receipt } from '@mui/icons-material';
+import { ExpandMore, Receipt, Delete } from '@mui/icons-material';
 import axios from 'axios';
 import { API_BASE_URL } from '../config';
 
 function Orders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   useEffect(() => {
     fetchOrders();
@@ -39,6 +50,41 @@ function Orders() {
     }
   };
 
+  const handleDeleteClick = (orderId) => {
+    setSelectedOrderId(orderId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await axios.delete(`${API_BASE_URL}/orders/${selectedOrderId}`);
+      setOrders(orders.filter(order => order._id !== selectedOrderId));
+      setSnackbar({
+        open: true,
+        message: 'Order cancelled successfully',
+        severity: 'success'
+      });
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.message || 'Error cancelling order',
+        severity: 'error'
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setSelectedOrderId(null);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setSelectedOrderId(null);
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'pending':
@@ -52,6 +98,10 @@ function Orders() {
       default:
         return 'default';
     }
+  };
+
+  const canCancelOrder = (status) => {
+    return status !== 'delivered';
   };
 
   if (loading) {
@@ -166,10 +216,56 @@ function Orders() {
                   </Typography>
                 </Box>
               )}
+
+              {canCancelOrder(order.status) && (
+                <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    startIcon={<Delete />}
+                    onClick={() => handleDeleteClick(order._id)}
+                  >
+                    Cancel Order
+                  </Button>
+                </Box>
+              )}
             </AccordionDetails>
           </Accordion>
         ))}
       </Box>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteCancel}
+      >
+        <DialogTitle>Cancel Order</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to cancel this order? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel} color="primary">
+            No, Keep Order
+          </Button>
+          <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+            Yes, Cancel Order
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }
